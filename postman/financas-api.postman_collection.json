@@ -15,6 +15,10 @@
     {
       "key": "contaId",
       "value": ""
+    },
+    {
+      "key": "transacaoId",
+      "value": ""
     }
   ],
   "item": [
@@ -279,6 +283,188 @@
                 "api",
                 "contas",
                 "{{contaId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transações",
+      "description": "Rode antes 'Criar conta' (pasta Contas). A categoria 4 é 'Moradia' (DESPESA) e a 1 é 'Salário' (RECEITA).",
+      "item": [
+        {
+          "name": "Listar transações",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar receita",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('transacaoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Salário outubro\",\n  \"valor\": 5000.0,\n  \"tipo\": \"RECEITA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar despesa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Aluguel\",\n  \"valor\": 1500.0,\n  \"tipo\": \"DESPESA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Despesa em categoria de receita (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Erro proposital\",\n  \"valor\": 10.0,\n  \"tipo\": \"DESPESA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar transação",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes/{{transacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes",
+                "{{transacaoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar transação",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Salário outubro + bônus\",\n  \"valor\": 5500.0,\n  \"tipo\": \"RECEITA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes/{{transacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes",
+                "{{transacaoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Excluir transação",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes/{{transacaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes",
+                "{{transacaoId}}"
               ]
             }
           }

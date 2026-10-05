@@ -67,6 +67,7 @@ O código é organizado **por funcionalidade**, não por camada:
 src/main/java/br/com/financas
 ├── categoria/          # controller, service, repository, entidade e DTOs
 ├── conta/              # mesmo padrão de categoria
+├── transacao/          # liga conta e categoria; consultas de saldo
 ├── config/             # configurações (OpenAPI)
 └── shared/
     ├── exception/      # exceções e handler global (RFC 7807)
@@ -86,7 +87,18 @@ src/main/java/br/com/financas
 | GET | `/api/contas/{id}` | Busca uma conta |
 | POST | `/api/contas` | Cria uma conta |
 | PUT | `/api/contas/{id}` | Atualiza uma conta |
-| DELETE | `/api/contas/{id}` | Exclui uma conta |
+| DELETE | `/api/contas/{id}` | Exclui uma conta (bloqueado se houver transações) |
+| GET | `/api/transacoes?page=&size=` | Lista as transações (mais recentes primeiro) |
+| GET | `/api/transacoes/{id}` | Busca uma transação |
+| POST | `/api/transacoes` | Registra uma receita ou despesa |
+| PUT | `/api/transacoes/{id}` | Atualiza uma transação |
+| DELETE | `/api/transacoes/{id}` | Exclui uma transação |
+
+### Regras de negócio
+- O **tipo da transação** precisa ser igual ao da categoria (uma despesa não entra em "Salário").
+- O **valor é sempre positivo**: o tipo define se soma ou subtrai.
+- **Saldo atual** da conta = saldo inicial + receitas − despesas.
+- Conta e categoria **com transações** não podem ser excluídas, e a categoria também não pode mudar de tipo.
 
 > Enquanto a autenticação não existe, todas as requisições usam um **usuário de demonstração** (id 1, criado na migration V3).
 
@@ -112,12 +124,14 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - **Categorias globais** (`usuario_id` nulo) + categorias próprias do usuário.
 - **`UsuarioLogado` isolado**: hoje devolve o usuário de demonstração. Com o JWT, só essa classe muda.
 - **Conta de outro usuário responde 404** (e não 403), para não revelar que o recurso existe.
+- **Sem N+1**: a listagem de transações carrega conta e categoria na mesma consulta (`@EntityGraph`), e o saldo de todas as contas da página sai de uma única consulta agrupada.
+- **Saldo calculado, não armazenado**: não existe uma coluna de saldo que possa ficar desatualizada; o valor vem sempre da soma das transações.
 
 ## 🗺️ Roadmap
 - [x] Estrutura, Docker, Flyway, Swagger, CI
 - [x] CRUD de categorias
 - [x] CRUD de contas
-- [ ] CRUD de transações e saldo atual das contas
+- [x] CRUD de transações e saldo atual das contas
 - [ ] Autenticação JWT e isolamento por usuário
 - [ ] Filtros e relatório mensal
 - [ ] Exportação CSV

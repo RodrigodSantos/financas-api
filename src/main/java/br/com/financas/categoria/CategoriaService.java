@@ -4,6 +4,7 @@ import br.com.financas.categoria.dto.CategoriaRequest;
 import br.com.financas.categoria.dto.CategoriaResponse;
 import br.com.financas.shared.exception.RecursoNaoEncontradoException;
 import br.com.financas.shared.exception.RegraNegocioException;
+import br.com.financas.transacao.TransacaoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoriaService {
 
     private final CategoriaRepository repository;
+    private final TransacaoRepository transacaoRepository;
 
-    public CategoriaService(CategoriaRepository repository) {
+    public CategoriaService(CategoriaRepository repository, TransacaoRepository transacaoRepository) {
         this.repository = repository;
+        this.transacaoRepository = transacaoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -46,13 +49,21 @@ public class CategoriaService {
         if (repository.existsByNomeIgnoreCaseAndTipoAndIdNot(request.nome(), request.tipo(), id)) {
             throw new RegraNegocioException("Já existe uma categoria de " + request.tipo() + " com o nome '" + request.nome() + "'");
         }
+        // Trocar o tipo deixaria as transações existentes incoerentes (ex.: despesas numa categoria de receita)
+        if (categoria.getTipo() != request.tipo() && transacaoRepository.existsByCategoriaId(id)) {
+            throw new RegraNegocioException("A categoria '" + categoria.getNome() + "' possui transações e não pode mudar de tipo");
+        }
         categoria.atualizar(request.nome(), request.tipo());
         return CategoriaResponse.de(categoria);
     }
 
     @Transactional
     public void excluir(Long id) {
-        repository.delete(buscarEntidade(id));
+        Categoria categoria = buscarEntidade(id);
+        if (transacaoRepository.existsByCategoriaId(id)) {
+            throw new RegraNegocioException("A categoria '" + categoria.getNome() + "' possui transações e não pode ser excluída");
+        }
+        repository.delete(categoria);
     }
 
     private Categoria buscarEntidade(Long id) {
