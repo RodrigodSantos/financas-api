@@ -4,7 +4,11 @@
 
 API REST de finanças pessoais para controlar contas, categorias, receitas e despesas, com relatórios mensais.
 
-> 🚧 Em desenvolvimento. Veja o [roadmap](#-roadmap).
+## 🌐 Demo online
+- **Swagger:** _link disponível após o deploy_
+- **Login demo:** `demo@financas.local` / `demo1234` (já tem contas, transações e relatório preenchidos)
+
+> ⏳ Hospedado no plano gratuito: depois de um tempo sem acesso, a primeira requisição pode levar cerca de 1 minuto para "acordar" a API.
 
 ## 🛠️ Stack
 - **Java 17** + **Spring Boot 3**
@@ -53,6 +57,20 @@ mvn verify
 ```
 O Docker precisa estar rodando: o Testcontainers sobe um Postgres temporário para os testes.
 Relatório de cobertura: `target/site/jacoco/index.html`.
+
+## ☁️ Deploy
+
+```
+git push → GitHub Actions (testes) → Render (build do Dockerfile) → API no ar
+                                             │
+                                             └── PostgreSQL no Neon
+```
+
+- **[Render](https://render.com)** roda a API a partir do `Dockerfile`, com a configuração versionada em [`render.yaml`](render.yaml).
+- **[Neon](https://neon.tech)** hospeda o PostgreSQL.
+- Perfil **`prod`** ([`application-prod.yml`](src/main/resources/application-prod.yml)): pool de conexões reduzido e **dados de exemplo** para o usuário demo (`db/demo`), que nunca são carregados nos testes.
+- A JVM é ajustada para caber em 512 MB (`JAVA_TOOL_OPTIONS` no Dockerfile).
+- Segredos (`DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`) ficam só nas variáveis de ambiente da plataforma.
 
 ## 🗂️ Modelo de dados
 
@@ -186,4 +204,4 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - [x] Autenticação JWT e isolamento por usuário
 - [x] Filtros e relatório mensal
 - [x] Exportação CSV
-- [ ] Deploy
+- [ ] Deploy (configuração pronta; falta publicar)
