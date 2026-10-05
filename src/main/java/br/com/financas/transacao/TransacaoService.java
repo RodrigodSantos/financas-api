@@ -90,7 +90,7 @@ public class TransacaoService {
     /** Aceita categoria global (sem dono) ou do próprio usuário. */
     private Categoria buscarCategoria(Long categoriaId) {
         return categoriaRepository.findById(categoriaId)
-                .filter(c -> c.getUsuarioId() == null || c.getUsuarioId().equals(usuarioLogado.getId()))
+                .filter(c -> c.isVisivelPara(usuarioLogado.getId()))
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria", categoriaId));
     }
 }

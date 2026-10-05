@@ -25,3 +25,10 @@ management:
     web:
       exposure:
         include: health,info
+
+financas:
+  jwt:
+    # Em produção, definir JWT_SECRET com no mínimo 32 caracteres aleatórios.
+    # O valor padrão serve só para desenvolvimento local.
+    secret: ${JWT_SECRET:dev-only-segredo-local-troque-em-producao-123456}
+    expiracao: ${JWT_EXPIRACAO:1h}

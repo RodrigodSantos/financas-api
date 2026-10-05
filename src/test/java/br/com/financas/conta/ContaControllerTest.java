@@ -1,5 +1,6 @@
 package br.com.financas.conta;
 
+import br.com.financas.AutenticadoComoDemo;
 import br.com.financas.TestcontainersConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestcontainersConfig.class)
+@Import({TestcontainersConfig.class, AutenticadoComoDemo.class})
 @Transactional
 class ContaControllerTest {
 

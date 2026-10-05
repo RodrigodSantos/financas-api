@@ -28,6 +28,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-financas}
       DB_USER: ${DB_USER:-financas}
       DB_PASSWORD: ${DB_PASSWORD:-financas}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-segredo-local-troque-em-producao-123456}
     ports:
       - "8080:8080"
 

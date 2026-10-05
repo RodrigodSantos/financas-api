@@ -8,6 +8,7 @@ API REST de finanças pessoais para controlar contas, categorias, receitas e des
 
 ## 🛠️ Stack
 - **Java 17** + **Spring Boot 3**
+- **Spring Security** + **JWT** (OAuth2 Resource Server / Nimbus) + **BCrypt**
 - **Spring Data JPA** + **PostgreSQL 16**
 - **Flyway** para versionar o schema
 - **springdoc-openapi** (Swagger UI)
@@ -37,6 +38,15 @@ docker compose --profile app up --build
 - Swagger: http://localhost:8080/swagger-ui.html
 - Health: http://localhost:8080/actuator/health
 
+### 🔐 Autenticação
+Todas as rotas, exceto cadastro e login, exigem um token JWT.
+
+1. Faça login em `POST /api/auth/login` com o **usuário demo**: `demo@financas.local` / `demo1234` (ou crie o seu em `POST /api/auth/cadastro`).
+2. Copie o `token` da resposta.
+3. No Swagger, clique em **Authorize** e cole o token. Em outras ferramentas, envie o header `Authorization: Bearer <token>`.
+
+O token expira em 1 hora. Em produção, defina a variável `JWT_SECRET` (mínimo de 32 caracteres).
+
 ### Testes
 ```bash
 mvn verify
@@ -65,24 +75,29 @@ O código é organizado **por funcionalidade**, não por camada:
 
 ```
 src/main/java/br/com/financas
+├── auth/               # cadastro, login e geração do token JWT
+├── usuario/            # entidade e repository de usuário
 ├── categoria/          # controller, service, repository, entidade e DTOs
 ├── conta/              # mesmo padrão de categoria
 ├── transacao/          # liga conta e categoria; consultas de saldo
-├── config/             # configurações (OpenAPI)
+├── config/             # segurança (JWT, BCrypt, 401 em JSON) e OpenAPI
 └── shared/
     ├── exception/      # exceções e handler global (RFC 7807)
-    └── usuario/        # UsuarioLogado: único ponto que sabe quem é o usuário
+    └── usuario/        # UsuarioLogado: lê o id do usuário a partir do token
 ```
 
 ## 📡 Endpoints
 
 | Método | Rota | Descrição |
 |---|---|---|
-| GET | `/api/categorias?tipo=&page=&size=` | Lista categorias (paginado) |
+| POST | `/api/auth/cadastro` | Cria um usuário (público) |
+| POST | `/api/auth/login` | Devolve o token JWT (público) |
+| GET | `/api/auth/me` | Dados do usuário autenticado |
+| GET | `/api/categorias?tipo=&page=&size=` | Lista as categorias globais + as do usuário (paginado) |
 | GET | `/api/categorias/{id}` | Busca uma categoria |
 | POST | `/api/categorias` | Cria uma categoria |
-| PUT | `/api/categorias/{id}` | Atualiza uma categoria |
-| DELETE | `/api/categorias/{id}` | Exclui uma categoria |
+| PUT | `/api/categorias/{id}` | Atualiza uma categoria própria |
+| DELETE | `/api/categorias/{id}` | Exclui uma categoria própria |
 | GET | `/api/contas?tipo=&page=&size=` | Lista as contas do usuário (paginado) |
 | GET | `/api/contas/{id}` | Busca uma conta |
 | POST | `/api/contas` | Cria uma conta |
@@ -99,8 +114,8 @@ src/main/java/br/com/financas
 - O **valor é sempre positivo**: o tipo define se soma ou subtrai.
 - **Saldo atual** da conta = saldo inicial + receitas − despesas.
 - Conta e categoria **com transações** não podem ser excluídas, e a categoria também não pode mudar de tipo.
-
-> Enquanto a autenticação não existe, todas as requisições usam um **usuário de demonstração** (id 1, criado na migration V3).
+- Cada usuário vê **somente os próprios dados**. As **categorias padrão** (globais) são visíveis para todos, mas somente leitura (403).
+- Nome de categoria não pode repetir entre as do usuário nem com as globais.
 
 A collection do Postman está em [`postman/`](postman/financas-api.postman_collection.json).
 
@@ -122,7 +137,10 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - **Testcontainers em vez de H2**: os testes rodam no mesmo banco da produção.
 - **Records para DTOs**: imutáveis e sem código repetitivo.
 - **Categorias globais** (`usuario_id` nulo) + categorias próprias do usuário.
-- **`UsuarioLogado` isolado**: hoje devolve o usuário de demonstração. Com o JWT, só essa classe muda.
+- **`UsuarioLogado` isolado**: é o único ponto que lê o token. Na troca do usuário fixo para o JWT, nenhum service de Conta ou Transação precisou mudar.
+- **JWT com o suporte nativo do Spring** (OAuth2 Resource Server + Nimbus), sem biblioteca de terceiros. O `subject` do token é o id do usuário.
+- **Senha com BCrypt**, e login inválido devolve sempre a mesma mensagem genérica, sem revelar se o e-mail existe.
+- **API stateless**: sem sessão nem cookie, por isso o CSRF fica desativado.
 - **Conta de outro usuário responde 404** (e não 403), para não revelar que o recurso existe.
 - **Sem N+1**: a listagem de transações carrega conta e categoria na mesma consulta (`@EntityGraph`), e o saldo de todas as contas da página sai de uma única consulta agrupada.
 - **Saldo calculado, não armazenado**: não existe uma coluna de saldo que possa ficar desatualizada; o valor vem sempre da soma das transações.
@@ -132,7 +150,7 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - [x] CRUD de categorias
 - [x] CRUD de contas
 - [x] CRUD de transações e saldo atual das contas
-- [ ] Autenticação JWT e isolamento por usuário
+- [x] Autenticação JWT e isolamento por usuário
 - [ ] Filtros e relatório mensal
 - [ ] Exportação CSV
 - [ ] Deploy

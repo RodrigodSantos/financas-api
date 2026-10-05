@@ -1,19 +1,23 @@
 package br.com.financas.shared.usuario;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 /**
- * Ponto único que informa quem é o usuário da requisição.
+ * Ponto único que informa quem é o usuário da requisição: lê o id do "subject" do token JWT.
  * <p>
- * Enquanto a autenticação não existe, devolve sempre o usuário de demonstração (migration V3).
- * Quando o JWT entrar, só esta classe muda: passa a ler o id do token.
+ * Os services só conhecem esta classe, então não sabem (nem precisam saber) que a identificação vem de um JWT.
  */
 @Component
 public class UsuarioLogado {
 
-    public static final Long USUARIO_DEMO_ID = 1L;
-
     public Long getId() {
-        return USUARIO_DEMO_ID;
+        Authentication autenticacao = SecurityContextHolder.getContext().getAuthentication();
+        if (autenticacao == null || !(autenticacao.getPrincipal() instanceof Jwt jwt)) {
+            throw new IllegalStateException("Nenhum usuário autenticado na requisição");
+        }
+        return Long.valueOf(jwt.getSubject());
     }
 }

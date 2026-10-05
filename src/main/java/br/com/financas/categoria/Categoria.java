@@ -17,8 +17,8 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Nulo = categoria global. Passa a ser preenchido quando a autenticação (JWT) entrar.
-    @Column(name = "usuario_id")
+    // Nulo = categoria global (padrão do sistema, visível para todos e somente leitura)
+    @Column(name = "usuario_id", updatable = false)
     private Long usuarioId;
 
     @Column(nullable = false, length = 60)
@@ -31,9 +31,19 @@ public class Categoria {
     protected Categoria() {
     }
 
-    public Categoria(String nome, TipoCategoria tipo) {
+    public Categoria(Long usuarioId, String nome, TipoCategoria tipo) {
+        this.usuarioId = usuarioId;
         this.nome = nome;
         this.tipo = tipo;
+    }
+
+    public boolean isGlobal() {
+        return usuarioId == null;
+    }
+
+    /** Global ou do próprio usuário. */
+    public boolean isVisivelPara(Long usuarioId) {
+        return isGlobal() || this.usuarioId.equals(usuarioId);
     }
 
     public void atualizar(String nome, TipoCategoria tipo) {

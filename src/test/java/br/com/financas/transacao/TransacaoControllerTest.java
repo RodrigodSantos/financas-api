@@ -1,5 +1,6 @@
 package br.com.financas.transacao;
 
+import br.com.financas.AutenticadoComoDemo;
 import br.com.financas.TestcontainersConfig;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestcontainersConfig.class)
+@Import({TestcontainersConfig.class, AutenticadoComoDemo.class})
 @Transactional
 class TransacaoControllerTest {
 
@@ -143,24 +144,30 @@ class TransacaoControllerTest {
     }
 
     @Test
-    void naoDeveExcluirNemMudarTipoDeCategoriaEmUso() throws Exception {
-        registrar("Mercado", "100.00", "DESPESA", alimentacaoId);
+    void naoDeveExcluirNemMudarTipoDeCategoriaPropriaEmUso() throws Exception {
+        // Categoria do próprio usuário: as globais já são somente leitura (403)
+        Long restaurantesId = idDe(mockMvc.perform(post("/api/categorias")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Restaurantes", "tipo": "DESPESA"}
+                        """)));
+        registrar("Jantar", "100.00", "DESPESA", restaurantesId);
 
-        mockMvc.perform(delete("/api/categorias/{id}", alimentacaoId))
+        mockMvc.perform(delete("/api/categorias/{id}", restaurantesId))
                 .andExpect(status().isUnprocessableEntity());
 
-        mockMvc.perform(put("/api/categorias/{id}", alimentacaoId)
+        mockMvc.perform(put("/api/categorias/{id}", restaurantesId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"nome": "Alimentação", "tipo": "RECEITA"}
+                                {"nome": "Restaurantes", "tipo": "RECEITA"}
                                 """))
                 .andExpect(status().isUnprocessableEntity());
 
         // Renomear sem mudar o tipo continua permitido
-        mockMvc.perform(put("/api/categorias/{id}", alimentacaoId)
+        mockMvc.perform(put("/api/categorias/{id}", restaurantesId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"nome": "Mercado e restaurantes", "tipo": "DESPESA"}
+                                {"nome": "Restaurantes e bares", "tipo": "DESPESA"}
                                 """))
                 .andExpect(status().isOk());
     }
