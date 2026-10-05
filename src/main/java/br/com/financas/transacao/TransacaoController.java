@@ -5,10 +5,14 @@ import br.com.financas.transacao.dto.TransacaoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/transacoes")
@@ -34,10 +39,36 @@ public class TransacaoController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista as transações do usuário, das mais recentes para as mais antigas")
+    @Operation(summary = "Lista as transações do usuário, das mais recentes para as mais antigas, com filtros opcionais")
     public Page<TransacaoResponse> listar(
-            @PageableDefault(size = 20, sort = "data", direction = Sort.Direction.DESC) Pageable pageable) {
-        return service.listar(pageable);
+            @ParameterObject TransacaoFiltro filtro,
+            @ParameterObject @PageableDefault(size = 20, sort = "data", direction = Sort.Direction.DESC) Pageable pageable) {
+        return service.listar(filtro, pageable);
+    }
+
+    @GetMapping("/exportar")
+    @Operation(summary = "Exporta as transações em CSV (formato do Excel em português), com os mesmos filtros da listagem")
+    public ResponseEntity<byte[]> exportar(@ParameterObject TransacaoFiltro filtro) {
+        byte[] csv = service.exportarCsv(filtro);
+        return ResponseEntity.ok()
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(nomeDoArquivo(filtro))
+                        .build().toString())
+                .body(csv);
+    }
+
+    private String nomeDoArquivo(TransacaoFiltro filtro) {
+        if (filtro.inicio() != null && filtro.fim() != null) {
+            return "transacoes-" + filtro.inicio() + "_a_" + filtro.fim() + ".csv";
+        }
+        if (filtro.inicio() != null) {
+            return "transacoes-desde-" + filtro.inicio() + ".csv";
+        }
+        if (filtro.fim() != null) {
+            return "transacoes-ate-" + filtro.fim() + ".csv";
+        }
+        return "transacoes.csv";
     }
 
     @GetMapping("/{id}")

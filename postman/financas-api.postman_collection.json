@@ -56,7 +56,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"demo@financas.local\",\n  \"senha\": \"demo1234\"\n}"
+              "raw": "{\n  \"email\": \"demo@financas.local\",\n  \"senha\": \"demo1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
@@ -86,7 +91,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Seu Nome\",\n  \"email\": \"voce@email.com\",\n  \"senha\": \"senha-forte\"\n}"
+              "raw": "{\n  \"nome\": \"Seu Nome\",\n  \"email\": \"voce@email.com\",\n  \"senha\": \"senha-forte\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/cadastro",
@@ -127,7 +137,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"voce@email.com\",\n  \"senha\": \"senha-forte\"\n}"
+              "raw": "{\n  \"email\": \"voce@email.com\",\n  \"senha\": \"senha-forte\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
@@ -217,7 +232,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"DESPESA\"\n}"
+              "raw": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"DESPESA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/categorias",
@@ -260,7 +280,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Pets e veterinário\",\n  \"tipo\": \"DESPESA\"\n}"
+              "raw": "{\n  \"nome\": \"Pets e veterinário\",\n  \"tipo\": \"DESPESA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}",
@@ -351,7 +376,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Nubank\",\n  \"tipo\": \"CORRENTE\",\n  \"saldoInicial\": 1500.00\n}"
+              "raw": "{\n  \"nome\": \"Nubank\",\n  \"tipo\": \"CORRENTE\",\n  \"saldoInicial\": 1500.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/contas",
@@ -394,7 +424,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Nubank PJ\",\n  \"tipo\": \"CORRENTE\",\n  \"saldoInicial\": 2000.00\n}"
+              "raw": "{\n  \"nome\": \"Nubank PJ\",\n  \"tipo\": \"CORRENTE\",\n  \"saldoInicial\": 2000.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/contas/{{contaId}}",
@@ -453,6 +488,70 @@
                 {
                   "key": "size",
                   "value": "20"
+                },
+                {
+                  "key": "inicio",
+                  "value": "2026-10-01",
+                  "disabled": true
+                },
+                {
+                  "key": "fim",
+                  "value": "2026-10-31",
+                  "disabled": true
+                },
+                {
+                  "key": "contaId",
+                  "value": "{{contaId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "categoriaId",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "tipo",
+                  "value": "DESPESA",
+                  "disabled": true
+                },
+                {
+                  "key": "descricao",
+                  "value": "mercado",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Filtros opcionais e combináveis: ative os que quiser na aba Params."
+          }
+        },
+        {
+          "name": "Exportar CSV",
+          "request": {
+            "method": "GET",
+            "description": "Aceita os mesmos filtros da listagem. No Postman, use 'Send and Download' para salvar o arquivo.",
+            "url": {
+              "raw": "{{baseUrl}}/api/transacoes/exportar?inicio=2026-10-01&fim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacoes",
+                "exportar"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "fim",
+                  "value": "2026-10-31"
+                },
+                {
+                  "key": "tipo",
+                  "value": "DESPESA",
+                  "disabled": true
                 }
               ]
             }
@@ -481,7 +580,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"descricao\": \"Salário outubro\",\n  \"valor\": 5000.0,\n  \"tipo\": \"RECEITA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}"
+              "raw": "{\n  \"descricao\": \"Salário outubro\",\n  \"valor\": 5000.0,\n  \"tipo\": \"RECEITA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/transacoes",
@@ -507,7 +611,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"descricao\": \"Aluguel\",\n  \"valor\": 1500.0,\n  \"tipo\": \"DESPESA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 4\n}"
+              "raw": "{\n  \"descricao\": \"Aluguel\",\n  \"valor\": 1500.0,\n  \"tipo\": \"DESPESA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/transacoes",
@@ -533,7 +642,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"descricao\": \"Erro proposital\",\n  \"valor\": 10.0,\n  \"tipo\": \"DESPESA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}"
+              "raw": "{\n  \"descricao\": \"Erro proposital\",\n  \"valor\": 10.0,\n  \"tipo\": \"DESPESA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/transacoes",
@@ -576,7 +690,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"descricao\": \"Salário outubro + bônus\",\n  \"valor\": 5500.0,\n  \"tipo\": \"RECEITA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}"
+              "raw": "{\n  \"descricao\": \"Salário outubro + bônus\",\n  \"valor\": 5500.0,\n  \"tipo\": \"RECEITA\",\n  \"data\": \"2026-10-05\",\n  \"contaId\": {{contaId}},\n  \"categoriaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/transacoes/{{transacaoId}}",
@@ -604,6 +723,60 @@
                 "api",
                 "transacoes",
                 "{{transacaoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "item": [
+        {
+          "name": "Relatório mensal",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/relatorios/mensal?ano=2026&mes=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "relatorios",
+                "mensal"
+              ],
+              "query": [
+                {
+                  "key": "ano",
+                  "value": "2026"
+                },
+                {
+                  "key": "mes",
+                  "value": "10"
+                },
+                {
+                  "key": "contaId",
+                  "value": "{{contaId}}",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Relatório do mês atual",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/relatorios/mensal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "relatorios",
+                "mensal"
               ]
             }
           }

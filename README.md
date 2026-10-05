@@ -79,7 +79,8 @@ src/main/java/br/com/financas
 ├── usuario/            # entidade e repository de usuário
 ├── categoria/          # controller, service, repository, entidade e DTOs
 ├── conta/              # mesmo padrão de categoria
-├── transacao/          # liga conta e categoria; consultas de saldo
+├── transacao/          # liga conta e categoria; filtros (Specifications) e exportação CSV
+├── relatorio/          # relatório mensal com somas agrupadas no banco
 ├── config/             # segurança (JWT, BCrypt, 401 em JSON) e OpenAPI
 └── shared/
     ├── exception/      # exceções e handler global (RFC 7807)
@@ -103,11 +104,40 @@ src/main/java/br/com/financas
 | POST | `/api/contas` | Cria uma conta |
 | PUT | `/api/contas/{id}` | Atualiza uma conta |
 | DELETE | `/api/contas/{id}` | Exclui uma conta (bloqueado se houver transações) |
-| GET | `/api/transacoes?page=&size=` | Lista as transações (mais recentes primeiro) |
+| GET | `/api/transacoes?inicio=&fim=&contaId=&categoriaId=&tipo=&descricao=` | Lista as transações com filtros opcionais (mais recentes primeiro) |
+| GET | `/api/transacoes/exportar?...` | Exporta em CSV, com os mesmos filtros |
 | GET | `/api/transacoes/{id}` | Busca uma transação |
 | POST | `/api/transacoes` | Registra uma receita ou despesa |
 | PUT | `/api/transacoes/{id}` | Atualiza uma transação |
 | DELETE | `/api/transacoes/{id}` | Exclui uma transação |
+| GET | `/api/relatorios/mensal?ano=&mes=&contaId=` | Receitas, despesas e totais por categoria do mês |
+
+### Relatório mensal
+```json
+{
+  "periodo": "2026-10",
+  "totalReceitas": 5800.00,
+  "totalDespesas": 1880.00,
+  "saldoDoMes": 3920.00,
+  "contas": [
+    { "id": 4, "nome": "Carteira", "receitas":    0.00, "despesas":   80.00, "saldoDoMes":  -80.00 },
+    { "id": 3, "nome": "Nubank",   "receitas": 5800.00, "despesas": 1800.00, "saldoDoMes": 4000.00 }
+  ],
+  "despesasPorCategoria": [
+    { "categoriaId": 4, "categoria": "Moradia", "total": 1500.00, "percentual": 79.79,
+      "contas": [ { "id": 3, "nome": "Nubank", "total": 1500.00 } ] },
+    { "categoriaId": 5, "categoria": "Alimentação", "total": 380.00, "percentual": 20.21,
+      "contas": [ { "id": 3, "nome": "Nubank", "total": 300.00 }, { "id": 4, "nome": "Carteira", "total": 80.00 } ] }
+  ],
+  "receitasPorCategoria": [ "..." ]
+}
+```
+- `contas`: resumo de cada conta que teve movimentação no mês (ou só a conta filtrada, com `contaId`).
+- Em cada categoria, `contas` mostra de qual conta saiu (ou entrou) o valor.
+Sem `ano` e `mes`, usa o mês atual. O percentual é a participação dentro do mesmo tipo.
+
+### Exportação CSV
+Abre direto no Excel em português: separador `;`, vírgula decimal, data `dd/MM/yyyy` e UTF-8 com BOM. As despesas saem com valor negativo, para a coluna poder ser somada. Limite de 10.000 linhas por exportação.
 
 ### Regras de negócio
 - O **tipo da transação** precisa ser igual ao da categoria (uma despesa não entra em "Salário").
@@ -144,6 +174,9 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - **Conta de outro usuário responde 404** (e não 403), para não revelar que o recurso existe.
 - **Sem N+1**: a listagem de transações carrega conta e categoria na mesma consulta (`@EntityGraph`), e o saldo de todas as contas da página sai de uma única consulta agrupada.
 - **Saldo calculado, não armazenado**: não existe uma coluna de saldo que possa ficar desatualizada; o valor vem sempre da soma das transações.
+- **Filtros com JPA Specifications**: o `WHERE` é montado só com os filtros informados, em vez de um método no repository para cada combinação. O filtro do usuário está sempre presente, e `%` e `_` digitados na busca são escapados.
+- **Relatório agregado no banco** (`GROUP BY` + `SUM`): uma consulta só, independente do volume de transações.
+- **`Clock` injetável**: o "mês atual" vem de um bean, e não direto do relógio do sistema.
 
 ## 🗺️ Roadmap
 - [x] Estrutura, Docker, Flyway, Swagger, CI
@@ -151,6 +184,6 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - [x] CRUD de contas
 - [x] CRUD de transações e saldo atual das contas
 - [x] Autenticação JWT e isolamento por usuário
-- [ ] Filtros e relatório mensal
-- [ ] Exportação CSV
+- [x] Filtros e relatório mensal
+- [x] Exportação CSV
 - [ ] Deploy

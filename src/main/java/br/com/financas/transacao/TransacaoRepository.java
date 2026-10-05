@@ -3,8 +3,11 @@ package br.com.financas.transacao;
 import br.com.financas.categoria.TipoCategoria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,11 +16,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
+public interface TransacaoRepository extends JpaRepository<Transacao, Long>, JpaSpecificationExecutor<Transacao> {
 
     // Carrega conta e categoria na mesma consulta, evitando o problema N+1 na listagem
+    @Override
     @EntityGraph(attributePaths = {"conta", "categoria"})
-    Page<Transacao> findByContaUsuarioId(Long usuarioId, Pageable pageable);
+    Page<Transacao> findAll(Specification<Transacao> spec, Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = {"conta", "categoria"})
+    List<Transacao> findAll(Specification<Transacao> spec, Sort sort);
 
     @EntityGraph(attributePaths = {"conta", "categoria"})
     Optional<Transacao> findByIdAndContaUsuarioId(Long id, Long usuarioId);

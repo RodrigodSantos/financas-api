@@ -11,6 +11,8 @@ import br.com.financas.transacao.dto.TransacaoRequest;
 import br.com.financas.transacao.dto.TransacaoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +34,26 @@ public class TransacaoService {
         this.usuarioLogado = usuarioLogado;
     }
 
+    static final int LIMITE_EXPORTACAO = 10_000;
+
     @Transactional(readOnly = true)
-    public Page<TransacaoResponse> listar(Pageable pageable) {
-        return repository.findByContaUsuarioId(usuarioLogado.getId(), pageable)
+    public Page<TransacaoResponse> listar(TransacaoFiltro filtro, Pageable pageable) {
+        filtro.validar();
+        return repository.findAll(TransacaoSpecifications.doUsuario(usuarioLogado.getId(), filtro), pageable)
                 .map(TransacaoResponse::de);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportarCsv(TransacaoFiltro filtro) {
+        filtro.validar();
+        Specification<Transacao> spec = TransacaoSpecifications.doUsuario(usuarioLogado.getId(), filtro);
+
+        long total = repository.count(spec);
+        if (total > LIMITE_EXPORTACAO) {
+            throw new RegraNegocioException("A exportação tem " + total + " transações, acima do limite de "
+                    + LIMITE_EXPORTACAO + ". Refine o período ou os filtros.");
+        }
+        return TransacaoCsv.gerar(repository.findAll(spec, Sort.by("data", "id")));
     }
 
     @Transactional(readOnly = true)

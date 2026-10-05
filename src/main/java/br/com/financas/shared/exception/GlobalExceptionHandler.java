@@ -29,6 +29,13 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(RequisicaoInvalidaException.class)
+    public ProblemDetail handleRequisicaoInvalida(RequisicaoInvalidaException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Requisição inválida");
+        return problem;
+    }
+
     @ExceptionHandler(CredenciaisInvalidasException.class)
     public ProblemDetail handleCredenciaisInvalidas(CredenciaisInvalidasException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
