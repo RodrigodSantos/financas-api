@@ -1,0 +1,76 @@
+{
+  "info": {
+    "name": "Finanças API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "categoriaId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar categorias",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias?tipo=DESPESA&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"],
+              "query": [
+                { "key": "tipo", "value": "DESPESA" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar categoria",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('categoriaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"DESPESA\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] }
+          }
+        },
+        {
+          "name": "Buscar categoria",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+          }
+        },
+        {
+          "name": "Atualizar categoria",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pets e veterinário\",\n  \"tipo\": \"DESPESA\"\n}" },
+            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+          }
+        },
+        {
+          "name": "Excluir categoria",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

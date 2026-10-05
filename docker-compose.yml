@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: financas-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-financas}
+      POSTGRES_USER: ${DB_USER:-financas}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-financas}
+    ports:
+      # 5433 no host para não conflitar com um Postgres instalado localmente na 5432
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-financas}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: financas-api
+    profiles: ["app"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-financas}
+      DB_USER: ${DB_USER:-financas}
+      DB_PASSWORD: ${DB_PASSWORD:-financas}
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres-data:

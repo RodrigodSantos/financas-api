@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: financas-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/financas}
+    username: ${DB_USER:financas}
+    password: ${DB_PASSWORD:financas}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
