@@ -66,8 +66,11 @@ O código é organizado **por funcionalidade**, não por camada:
 ```
 src/main/java/br/com/financas
 ├── categoria/          # controller, service, repository, entidade e DTOs
+├── conta/              # mesmo padrão de categoria
 ├── config/             # configurações (OpenAPI)
-└── shared/exception/   # exceções e handler global (RFC 7807)
+└── shared/
+    ├── exception/      # exceções e handler global (RFC 7807)
+    └── usuario/        # UsuarioLogado: único ponto que sabe quem é o usuário
 ```
 
 ## 📡 Endpoints
@@ -79,6 +82,13 @@ src/main/java/br/com/financas
 | POST | `/api/categorias` | Cria uma categoria |
 | PUT | `/api/categorias/{id}` | Atualiza uma categoria |
 | DELETE | `/api/categorias/{id}` | Exclui uma categoria |
+| GET | `/api/contas?tipo=&page=&size=` | Lista as contas do usuário (paginado) |
+| GET | `/api/contas/{id}` | Busca uma conta |
+| POST | `/api/contas` | Cria uma conta |
+| PUT | `/api/contas/{id}` | Atualiza uma conta |
+| DELETE | `/api/contas/{id}` | Exclui uma conta |
+
+> Enquanto a autenticação não existe, todas as requisições usam um **usuário de demonstração** (id 1, criado na migration V3).
 
 A collection do Postman está em [`postman/`](postman/financas-api.postman_collection.json).
 
@@ -100,11 +110,14 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - **Testcontainers em vez de H2**: os testes rodam no mesmo banco da produção.
 - **Records para DTOs**: imutáveis e sem código repetitivo.
 - **Categorias globais** (`usuario_id` nulo) + categorias próprias do usuário.
+- **`UsuarioLogado` isolado**: hoje devolve o usuário de demonstração. Com o JWT, só essa classe muda.
+- **Conta de outro usuário responde 404** (e não 403), para não revelar que o recurso existe.
 
 ## 🗺️ Roadmap
 - [x] Estrutura, Docker, Flyway, Swagger, CI
 - [x] CRUD de categorias
-- [ ] CRUD de contas e transações
+- [x] CRUD de contas
+- [ ] CRUD de transações e saldo atual das contas
 - [ ] Autenticação JWT e isolamento por usuário
 - [ ] Filtros e relatório mensal
 - [ ] Exportação CSV

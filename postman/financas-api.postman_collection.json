@@ -4,8 +4,18 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "categoriaId", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "categoriaId",
+      "value": ""
+    },
+    {
+      "key": "contaId",
+      "value": ""
+    }
   ],
   "item": [
     {
@@ -17,12 +27,26 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/api/categorias?tipo=DESPESA&page=0&size=20",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "categorias"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categorias"
+              ],
               "query": [
-                { "key": "tipo", "value": "DESPESA" },
-                { "key": "page", "value": "0" },
-                { "key": "size", "value": "20" }
+                {
+                  "key": "tipo",
+                  "value": "DESPESA"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
               ]
             }
           }
@@ -42,32 +66,221 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"DESPESA\"\n}" },
-            "url": { "raw": "{{baseUrl}}/api/categorias", "host": ["{{baseUrl}}"], "path": ["api", "categorias"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"DESPESA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categorias"
+              ]
+            }
           }
         },
         {
           "name": "Buscar categoria",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            }
           }
         },
         {
           "name": "Atualizar categoria",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pets e veterinário\",\n  \"tipo\": \"DESPESA\"\n}" },
-            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Pets e veterinário\",\n  \"tipo\": \"DESPESA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            }
           }
         },
         {
           "name": "Excluir categoria",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}", "host": ["{{baseUrl}}"], "path": ["api", "categorias", "{{categoriaId}}"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/{{categoriaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "{{categoriaId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contas",
+      "item": [
+        {
+          "name": "Listar contas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/contas?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contas"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "tipo",
+                  "value": "CORRENTE",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar conta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('contaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Nubank\",\n  \"tipo\": \"CORRENTE\",\n  \"saldoInicial\": 1500.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar conta",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/contas/{{contaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contas",
+                "{{contaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atualizar conta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Nubank PJ\",\n  \"tipo\": \"CORRENTE\",\n  \"saldoInicial\": 2000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contas/{{contaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contas",
+                "{{contaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Excluir conta",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/contas/{{contaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contas",
+                "{{contaId}}"
+              ]
+            }
           }
         }
       ]
