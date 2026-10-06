@@ -5,7 +5,7 @@
 API REST de finanças pessoais para controlar contas, categorias, receitas e despesas, com relatórios mensais.
 
 ## 🌐 Demo online
-- **Swagger:** _link disponível após o deploy_
+- **Swagger:** https://financas-api-cp5q.onrender.com/swagger-ui.html
 - **Login demo:** `demo@financas.local` / `demo1234` (já tem contas, transações e relatório preenchidos)
 
 > ⏳ Hospedado no plano gratuito: depois de um tempo sem acesso, a primeira requisição pode levar cerca de 1 minuto para "acordar" a API.
@@ -204,4 +204,4 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - [x] Autenticação JWT e isolamento por usuário
 - [x] Filtros e relatório mensal
 - [x] Exportação CSV
-- [ ] Deploy (configuração pronta; falta publicar)
+- [x] Deploy (Render + Neon)
