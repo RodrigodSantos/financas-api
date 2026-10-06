@@ -1,11 +1,15 @@
 # 💰 Finanças API
 
 ![CI](https://github.com/RodrigodSantos/financas-api/actions/workflows/ci.yml/badge.svg)
+![Cobertura](.github/badges/jacoco.svg)
+![Branches](.github/badges/branches.svg)
 
 API REST de finanças pessoais para controlar contas, categorias, receitas e despesas, com relatórios mensais.
 
+![Swagger da Finanças API](docs/swagger.png)
+
 ## 🌐 Demo online
-- **Swagger:** https://financas-api-cp5q.onrender.com/swagger-ui.html
+- **Swagger:** https://financas-api-cp5q.onrender.com (a raiz abre direto a documentação)
 - **Login demo:** `demo@financas.local` / `demo1234` (já tem contas, transações e relatório preenchidos)
 
 > ⏳ Hospedado no plano gratuito: depois de um tempo sem acesso, a primeira requisição pode levar cerca de 1 minuto para "acordar" a API.
@@ -60,10 +64,13 @@ Relatório de cobertura: `target/site/jacoco/index.html`.
 
 ## ☁️ Deploy
 
-```
-git push → GitHub Actions (testes) → Render (build do Dockerfile) → API no ar
-                                             │
-                                             └── PostgreSQL no Neon
+```mermaid
+flowchart LR
+    dev[git push] --> gh[GitHub]
+    gh --> ci["GitHub Actions<br/>testes + cobertura"]
+    gh --> render["Render<br/>build do Dockerfile"]
+    cliente[Navegador / Postman] -->|HTTPS + JWT| render
+    render -->|JDBC| neon[("PostgreSQL<br/>Neon")]
 ```
 
 - **[Render](https://render.com)** roda a API a partir do `Dockerfile`, com a configuração versionada em [`render.yaml`](render.yaml).
@@ -77,15 +84,43 @@ git push → GitHub Actions (testes) → Render (build do Dockerfile) → API no
 ```mermaid
 erDiagram
     USUARIO ||--o{ CONTA : possui
-    USUARIO ||--o{ CATEGORIA : cria
+    USUARIO |o--o{ CATEGORIA : cria
     CONTA ||--o{ TRANSACAO : registra
     CATEGORIA ||--o{ TRANSACAO : classifica
 
-    USUARIO { bigint id string nome string email }
-    CONTA { bigint id string nome string tipo decimal saldo_inicial }
-    CATEGORIA { bigint id string nome string tipo }
-    TRANSACAO { bigint id string descricao decimal valor string tipo date data }
+    USUARIO {
+        bigint id PK
+        varchar nome
+        varchar email UK
+        varchar senha_hash "BCrypt"
+        timestamp criado_em
+    }
+    CONTA {
+        bigint id PK
+        bigint usuario_id FK
+        varchar nome
+        varchar tipo "CORRENTE, POUPANCA, CARTEIRA, INVESTIMENTO"
+        numeric saldo_inicial
+        timestamp criado_em
+    }
+    CATEGORIA {
+        bigint id PK
+        bigint usuario_id FK "nulo = categoria global"
+        varchar nome
+        varchar tipo "RECEITA, DESPESA"
+    }
+    TRANSACAO {
+        bigint id PK
+        bigint conta_id FK
+        bigint categoria_id FK
+        varchar descricao
+        numeric valor "sempre maior que 0"
+        varchar tipo "RECEITA, DESPESA"
+        date data
+        timestamp criado_em
+    }
 ```
+O saldo da conta não é uma coluna: é calculado a partir do saldo inicial e das transações.
 
 ## 📁 Estrutura
 
@@ -205,3 +240,10 @@ Todos os erros seguem o padrão [RFC 7807](https://www.rfc-editor.org/rfc/rfc780
 - [x] Filtros e relatório mensal
 - [x] Exportação CSV
 - [x] Deploy (Render + Neon)
+
+### Melhorias futuras
+- Refresh token e logout (hoje o token só expira após 1 hora)
+- Transações recorrentes (aluguel, salário) e parceladas
+- Metas de gastos por categoria, com alerta ao se aproximar do limite
+- Transferência entre contas do mesmo usuário
+- Importação de extrato bancário (OFX/CSV)

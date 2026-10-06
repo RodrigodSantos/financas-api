@@ -7,6 +7,13 @@ services:
     plan: free
     region: virginia # mesma região do banco no Neon (AWS us-east-1)
     healthCheckPath: /actuator/health
+    # Mudanças só de documentação, CI ou badges não geram um novo deploy
+    buildFilter:
+      ignoredPaths:
+        - .github/**
+        - docs/**
+        - postman/**
+        - "**/*.md"
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
